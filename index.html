@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ôn Tập Lịch Sử 12 - Chuẩn GDPT 2018</title>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --correct: #16a34a;
+      --correct-bg: #dcfce7;
+      --wrong: #dc2626;
+      --wrong-bg: #fee2e2;
+      --warn: #f59e0b;
+      --warn-bg: #fef3c7;
+    }
+    body.dark {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-light: #1e3a8a;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #334155;
+      --correct-bg: #064e3b;
+      --wrong-bg: #7f1d1d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 90px;
+      transition: background 0.2s, color 0.2s;
+    }
+    /* Thanh điều hướng cố định trên cùng */
+    .sticky-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    }
+    .topbar-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .timer-pill {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .timer-pill.urgent {
+      background: var(--wrong-bg);
+      color: var(--wrong);
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pill-btn {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pill-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .pill-btn.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .pill-btn.primary:hover { background: var(--primary-hover); }
+
+    /* Bố cục 2 cột */
+    .main-layout {
+      max-width: 1100px;
+      margin: 24px auto 0;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .main-layout { grid-template-columns: 1fr; }
+      .sidebar { order: -1; }
+    }
+
+    /* Cột phải: Bảng điều hướng câu hỏi (Palette) */
+    .sidebar {
+      position: sticky;
+      top: 76px;
+      background: var(--card);
+      border-radius: 24px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+    .sidebar-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .p-dot {
+      height: 36px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: var(--bg);
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .p-dot:hover { border-color: var(--primary); }
+    .p-dot.done { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .p-dot.partial { background: var(--warn-bg); color: #92400e; border-color: var(--warn); }
+    .p-dot.correct { background: var(--correct); color: #fff; border-color: var(--correct); }
+    .p-dot.wrong { background: var(--wrong); color: #fff; border-color: var(--wrong); }
+
+    .pool-stats {
+      font-size: 0.82rem;
+      color: var(--muted);
+      background: var(--bg);
+      padding: 12px;
+      border-radius: 16px;
+      margin-top: 8px;
+    }
+    .progress-bar-wrap {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 6px 0 10px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+
+    /* Cột trái: Nội dung câu hỏi */
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 24px 0 14px;
+      padding-left: 12px;
+      border-left: 4px solid var(--primary);
+    }
+    .question-card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+      border: 1px solid var(--border);
+      scroll-margin-top: 85px;
+    }
+    .q-header {
+      font-weight: 600;
+      margin-bottom: 14px;
+      font-size: 1.02rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .q-num {
+      color: var(--primary);
+      font-weight: 700;
+      margin-right: 6px;
+    }
+    .q-id-tag {
+      font-size: 0.75rem;
+      color: var(--muted);
+      background: var(--bg);
+      padding: 3px 10px;
+      border-radius: 999px;
+      height: fit-content;
+      white-space: nowrap;
+    }
+    .passage {
+      background: var(--bg);
+      border-radius: 18px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      font-style: italic;
+      border: 1px dashed var(--border);
+      font-size: 0.95rem;
+    }
+    .passage-source {
+      display: block;
+      text-align: right;
+      font-style: normal;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .option-item {
+      display: flex;
+      align-items: center;
+      padding: 13px 18px;
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      user-select: none;
+    }
+    .option-item:hover {
+      border-color: var(--primary);
+    }
+    .option-item.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      font-weight: 500;
+    }
+    .option-item.correct {
+      border-color: var(--correct);
+      background: var(--correct-bg);
+      font-weight: 600;
+    }
+    .option-item.wrong {
+      border-color: var(--wrong);
+      background: var(--wrong-bg);
+    }
+    .opt-letter {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .option-item.selected .opt-letter { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .option-item.correct .opt-letter { background: var(--correct); color: #fff; border-color: var(--correct); }
+    .option-item.wrong .opt-letter { background: var(--wrong); color: #fff; border-color: var(--wrong); }
+
+    /* Đúng / Sai */
+    .tf-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      margin-bottom: 10px;
+    }
+    .tf-text { flex: 1; font-size: 0.95rem; }
+    .tf-btns { display: flex; gap: 8px; flex-shrink: 0; }
+    .tf-btn {
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: 2px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.15s;
+    }
+    .tf-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .tf-row.correct-row { border-color: var(--correct); background: var(--correct-bg); }
+    .tf-row.wrong-row { border-color: var(--wrong); background: var(--wrong-bg); }
+    .ans-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      display: none;
+    }
+
+    .result-box {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 24px;
+      margin-bottom: 24px;
+      text-align: center;
+      border: 2px solid var(--primary);
+      display: none;
+    }
+    .score-big {
+      font-size: 2.6rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin: 4px 0;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+      font-size: 0.88rem;
+      background: var(--card);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    table.data-table th, table.data-table td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    @media (max-width: 600px) {
+      .tf-row { flex-direction: column; align-items: flex-start; }
+      .tf-btns { align-self: flex-end; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="sticky-topbar">
+  <div class="topbar-inner">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <strong style="font-size:1.1rem;">Lịch Sử 12 (GDPT 2018)</strong>
+      <div class="timer-pill" id="timer-display">⏱ 45:00</div>
+    </div>
+    <div class="top-controls">
+      <button class="pill-btn" onclick="toggleShuffleOpts()" id="shuffle-opt-btn">🔀 Đảo đáp án: BẬT</button>
+      <button class="pill-btn" onclick="toggleDarkMode()">🌙 Giao diện</button>
+      <button class="pill-btn" onclick="loadNewQuiz()">🔄 Đề mới</button>
+      <button class="pill-btn primary" id="submit-top-btn" onclick="gradeQuiz()">✓ Nộp bài</button>
+    </div>
+  </div>
+</div>
+
+<div class="main-layout">
+  <!-- Cột trái: Câu hỏi -->
+  <div>
+    <div class="result-box" id="result-box">
+      <div style="font-weight: 600; color: var(--muted);">KẾT QUẢ BÀI LÀM (THANG ĐIỂM GDPT 2018)</div>
+      <div class="score-big" id="total-score">0.00 / 10</div>
+      <div id="score-detail" style="font-size: 0.95rem; margin-bottom: 14px;"></div>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button class="pill-btn" onclick="filterWrongOnly()" id="filter-wrong-btn">🔍 Chỉ xem câu làm sai</button>
+        <button class="pill-btn primary" onclick="loadNewQuiz()">Làm đề tiếp theo →</button>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:0;">PHẦN I: Trắc nghiệm nhiều phương án lựa chọn (24 câu - 6,0 điểm)</div>
+    <div id="part1-container"></div>
+
+    <div class="section-title">PHẦN II: Trắc nghiệm Đúng / Sai (4 câu - 4,0 điểm)</div>
+    <div id="part2-container"></div>
+  </div>
+
+  <!-- Cột phải: Bảng tiến độ & Ngân hàng câu hỏi -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <span>Tiến độ làm bài</span>
+      <span id="answered-count">0 / 28 câu</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
+    </div>
+
+    <div style="font-size:0.8rem; color:var(--muted); margin: 10px 0 6px; font-weight:600;">PHẦN I (Câu 1 - 24)</div>
+    <div class="palette-grid" id="palette-p1"></div>
+
+    <div style="font-size:0.8rem; color:var(--muted); margin: 10px 0 6px; font-weight:600;">PHẦN II (Câu 1 - 4)</div>
+    <div class="palette-grid" id="palette-p2"></div>
+
+    <div class="pool-stats">
+      <div style="font-weight:700; margin-bottom:4px; color:var(--text);">📦 Kho đề chưa xuất hiện:</div>
+      <div id="pool-p1">Phần I: ...</div>
+      <div id="pool-p2">Phần II: ...</div>
+      <button class="pill-btn" style="width:100%; margin-top:10px; font-size:0.8rem;" onclick="resetPool()">Làm mới lại toàn bộ kho (64 + 10 câu)</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+const PART1_BANK = [
+  { id: 1, q: "Liên hợp quốc có hoạt động nào sau đây để bảo đảm quyền con người?", a: ["Xây dựng và kí kết các văn bản, điều ước quốc tế về quyền con người.", "Can thiệp trực tiếp vào các nước nhằm thi hành triệt để quyền con người.", "Xây dựng thể chế chính trị thống nhất cho tất cả các quốc gia trên thế giới.", "Thành lập khối phòng thủ chung dựa trên sự đồng thuận của các thành viên."], c: 0 },
+  { id: 2, q: "Một trong những xu thế phát triển chính của thế giới sau cuộc Chiến tranh lạnh là", a: ["chấm dứt ngay mọi xung đột giữa các nước.", "hạn chế liên kết về kinh tế giữa tất cả các nước.", "đối thoại và hợp tác trong quan hệ quốc tế.", "đối đầu trực tiếp về quân sự giữa Liên Xô và Mỹ."], c: 2 },
+  { id: 3, q: "Một trong những nguyên nhân dẫn đến sự sụp đổ Trật tự thế giới hai cực I-an-ta là do", a: ["tác động trực tiếp của cuộc Chiến tranh thế giới thứ nhất.", "sự ra đời của Cộng đồng Chính trị - An ninh ASEAN.", "thắng lợi của phong trào giải phóng dân tộc trên thế giới.", "Liên Xô không còn là siêu cường kinh tế số một thế giới."], c: 2 },
+  { id: 4, q: "Nguyên thủ của những quốc gia nào sau đây cùng tuyên bố chấm dứt Chiến tranh lạnh vào năm 1989?", a: ["Pháp và Nhật Bản.", "Anh và Hà Lan.", "Ấn Độ và Ai Cập.", "Mỹ và Liên Xô."], c: 3 },
+  { id: 5, q: "Quốc gia nào sau đây tham dự Hội nghị I-an-ta năm 1945?", a: ["Ma-rốc.", "Anh.", "Đông Ti-mo.", "Lào."], c: 1 },
+  { id: 6, q: "Hoạt động của Liên hợp quốc để duy trì hòa bình và an ninh quốc tế là", a: ["thành lập Tổ chức Hiệp ước Bắc Đại Tây Dương.", "xây dựng công ước quốc tế chống chạy đua vũ trang.", "xây dựng quân đội thống nhất cho tất cả các quốc gia.", "thành lập nhiều liên minh quân sự để giúp đỡ nhau."], c: 1 },
+  { id: 7, q: "Nội dung nào sau đây phản ánh đúng về bối cảnh thành lập Liên hợp quốc (1945)?", a: ["Phe Liên minh cần giải quyết mâu thuẫn với phe Hiệp ước.", "Mỹ phát động chiến tranh thế giới mới để làm bá chủ.", "Trật tự thế giới hai cực I-an-ta xác lập trên toàn thế giới.", "Chiến tranh thế giới thứ hai bước vào giai đoạn cuối."], c: 3 },
+  { id: 8, q: "Nội dung nào dưới đây phù hợp với “Trật tự thế giới đa cực”?", a: ["Mĩ lãnh đạo và chi phối quan hệ quốc tế.", "Các cường quốc có vị thế cao trong trật tự mới.", "Chỉ có các nước tư bản thống trị thế giới.", "Hòa bình cho tất cả các quốc gia, dân tộc."], c: 1 },
+  { id: 9, q: "Sau Chiến tranh lạnh, các quốc gia đều tập trung phát triển lĩnh vực trọng tâm là", a: ["báo chí.", "văn hóa.", "kinh tế.", "tư tưởng."], c: 2 },
+  { id: 10, q: "Tác động của sự sụp đổ Trật tự hai cực I-an-ta đến tình hình thế giới là", a: ["đưa đến sự sụp đổ của chủ nghĩa xã hội ở Liên Xô.", "hòa bình thế giới sẽ luôn được đảm bảo vững chắc.", "tất cả các nước thuộc địa đều được trao trả độc lập.", "dẫn đến sự hình thành của một trật tự thế giới mới."], c: 3 },
+  { id: 11, q: "Việt Nam chính thức trở thành thành viên của Liên hợp quốc nhằm mục đích gì?", a: ["Nhờ Liên hợp quốc giải quyết tranh chấp biển đảo.", "Thiết lập khối liên minh quân sự ở Đông Nam Á.", "Tăng cường vị thế và tham gia giải quyết các vấn đề toàn cầu.", "Tìm kiếm nguồn viện trợ không hoàn lại từ phương Tây."], c: 2 },
+  { id: 12, q: "Duy trì hòa bình, an ninh thế giới là nhiệm vụ của tổ chức nào dưới đây?", a: ["Liên minh châu Âu.", "Liên hiệp quốc.", "Liên minh châu Phi.", "Tổ chức Y tế thế giới."], c: 1 },
+  { id: 13, q: "Cuộc chạy đua vũ trang giữa Liên Xô và Mĩ (1947 - 1989) là biểu hiện của", a: ["hợp tác chống chủ nghĩa Phát xít.", "chiến tranh trực tiếp giữa hai cường quốc.", "Chiến tranh lạnh giữa hai cường quốc.", "trật tự thế giới đa cực nhiều trung tâm."], c: 2 },
+  { id: 14, q: "Sự hình thành trật tự thế giới sau Chiến tranh lạnh chịu tác động bởi yếu tố nào sau đây?", a: ["Sự vươn lên của hệ thống xã hội chủ nghĩa.", "Cuộc chạy đua vũ trang giữa Liên Xô và Mĩ.", "Sự phát triển của cách mạng khoa học công nghệ.", "Cuộc đấu tranh giành độc lập của các nước châu Á."], c: 2 },
+  { id: 15, q: "Nội dung nào dưới đây là đúng về xu thế đa cực sau Chiến tranh lạnh?", a: ["Là nguy cơ khiến các quốc gia phải đóng cửa.", "Chịu sự chi phối hoàn toàn của Liên hợp quốc.", "Hình thành từ trước Chiến tranh thế giới thứ nhất.", "Tạo ra thời cơ và thách thức cho các quốc gia."], c: 3 },
+  { id: 16, q: "Để vươn lên xác lập vị thế trong trật tự thế giới hiện nay, nhiệm vụ của các quốc gia là", a: ["tham gia vào tất cả các liên minh quân sự trên thế giới.", "đóng cửa nền kinh tế để tránh sự cạnh tranh từ bên ngoài.", "gia tăng sức mạnh tổng hợp của quốc gia về mọi mặt.", "đối đầu trực diện về quân sự với tất cả các cường quốc."], c: 2 },
+  { id: 17, q: "Tổ chức quân sự NATO được thành lập năm 1949 có thành viên là", a: ["Thái Lan.", "Mĩ.", "Ai Cập.", "Cu-ba."], c: 1 },
+  { id: 18, q: "Nhận định nào sau đây phản ánh đúng về quan hệ quốc tế sau Chiến tranh lạnh?", a: ["Hợp tác kinh tế là đối ngoại duy nhất của các quốc gia.", "Quan hệ quốc tế tiếp tục đan xen nhiều yếu tố phức tạp.", "Các cường quốc hạn chế chạy đua sức mạnh tổng hợp.", "Xung đột ở các khu vực sớm được giải quyết thành công."], c: 1 },
+  { id: 19, q: "Một trong những xu thế phát triển chính của thế giới sau khi Trật tự hai cực I-an-ta sụp đổ là", a: ["đơn cực.", "độc quyền.", "đa cực.", "hai cực."], c: 2 },
+  { id: 20, q: "Cuộc chiến tranh cục bộ lớn nhất, dài nhất phản ánh mâu thuẫn giữa 2 cực trong Trật tự hai cực I-an-ta là", a: ["chiến tranh Triều Tiên (1950-1953).", "Pháp xâm lược Việt Nam (1945-1954).", "chiến tranh giữa I-xra-en và A-rập (từ 1948).", "Mĩ xâm lược Việt Nam (1954-1975)."], c: 3 },
+  { id: 21, q: "Biểu hiện đối đầu chủ yếu giữa Liên Xô và Mĩ trong thời kì Chiến tranh lạnh (1947 - 1989) là gì?", a: ["Công kích tư tưởng.", "Cô lập chính trị.", "Cấm vận kinh tế.", "Chạy đua vũ trang."], c: 3 },
+  { id: 22, q: "Mục tiêu và nguyên tắc hoạt động của Liên hợp quốc được quy định trong văn kiện nào?", a: ["Hiến pháp.", "Hiến chương.", "Tuyên ngôn.", "Hiệp định."], c: 1 },
+  { id: 23, q: "Nội dung nào sau đây không phải là nguyên tắc hoạt động của Liên hợp quốc?", a: ["Giải quyết các tranh chấp quốc tế bằng biện pháp hòa bình.", "Tôn trọng các nghĩa vụ quốc tế và luật pháp quốc tế.", "Không can thiệp vào công việc nội bộ của các quốc gia.", "Thúc đẩy hợp tác giữa các nước để sản xuất vũ khí."], c: 3 },
+  { id: 24, q: "Mối quan hệ giữa Liên Xô và các nước Đông Âu trong thời kì Chiến tranh lạnh (1947 - 1989) là gì?", a: ["Đồng minh.", "Đối thủ.", "Lệ thuộc.", "Đối đầu."], c: 0 },
+  { id: 25, q: "Nguyên thủ quốc gia nào sau đây tham dự Hội nghị I-an-ta (tháng 2-1945)?", a: ["Ấn Độ.", "Canada.", "Xingapo.", "Mĩ."], c: 3 },
+  { id: 26, q: "Trật tự hai cực I-an-ta được xác lập sau Chiến tranh thế giới thứ hai khẳng định vị thế hàng đầu của hai cường quốc nào?", a: ["Liên Xô và Mĩ.", "Trung Quốc và Nhật Bản.", "Thái Lan và Hà Lan.", "Nam Phi và Ai Cập."], c: 0 },
+  { id: 27, q: "Theo quyết định của Hội nghị I-an-ta (2-1945), Liên Xô không đóng quân tại khu vực nào sau đây?", a: ["Đông Đức", "Đông Âu", "Đông Béc-lin", "Tây Đức"], c: 3 },
+  { id: 28, q: "Nhân tố hàng đầu chi phối quan hệ quốc tế từ sau Chiến tranh thế giới thứ hai đến đầu thập niên 90 của thế kỉ XX là gì?", a: ["Trật tự thế giới hai cực I-an-ta.", "Sự ra đời và hoạt động của tổ chức ASEAN.", "Sự ra đời của hai nhà nước Đức.", "Sự ra đời và hoạt động của tổ chức NATO."], c: 0 },
+  { id: 29, q: "Trật tự thế giới hai cực I-an-ta hoàn toàn tan rã khi", a: ["tổ chức Hiệp ước Vácsava được thành lập.", "tổ chức Liên minh châu Âu được thành lập.", "chế độ xã hội chủ nghĩa ở Liên Xô sụp đổ.", "Trung Quốc tiến hành công cuộc cải cách."], c: 2 },
+  { id: 30, q: "Một trong những mục đích của tổ chức Liên hợp quốc là", a: ["thúc đẩy xu thế toàn cầu hóa phát triển.", "xóa bỏ sự bất bình đẳng trên thế giới.", "duy trì hòa bình và an ninh thế giới.", "chấm dứt tình trạng ô nhiễm môi trường."], c: 2 },
+  { id: 31, q: "Từ sau Chiến tranh thế giới thứ hai đến nửa đầu những năm 70 của thế kỷ XX, quan hệ giữa Mĩ và Liên Xô là", a: ["đối đầu.", "hợp tác.", "đối tác.", "đồng minh."], c: 0 },
+  { id: 32, q: "Từ đầu những năm 70 của thế kỉ XX đến năm 1991 là giai đoạn trật tự thế giới hai cực I-an-ta", a: ["bắt đầu được hình thành và phát triển.", "được xác lập và phát triển ở châu Âu.", "suy yếu và đi đến sụp đổ hoàn toàn.", "được xác lập và phát triển ở châu Á."], c: 2 },
+  { id: 33, q: "Tháng 12-1989, những người đứng đầu hai nước Mĩ và Liên Xô chính thức cùng tuyên bố", a: ["thiết lập quan hệ đối tác chiến lược.", "chấm dứt Chiến tranh lạnh.", "không phổ biến vũ khí hạt nhân.", "thủ tiêu tất cả vũ khí hạt nhân."], c: 1 },
+  { id: 34, q: "Yếu tố nào dưới đây không phải là nguyên nhân dẫn tới việc Liên Xô và Mĩ tuyên bố chấm dứt Chiến tranh lạnh?", a: ["Mĩ thất bại trong cuộc chiến tranh ở Việt Nam.", "Kinh tế Liên Xô lâm vào khủng hoảng trì trệ.", "Sự vươn lên mạnh mẽ của Nhật Bản và Tây Âu.", "Sự suy giảm về thế và lực do chạy đua vũ trang."], c: 0 },
+  { id: 35, q: "Trong giai đoạn sau Chiến tranh lạnh, để xây dựng sức mạnh thực sự, các quốc gia trên thế giới đều tập trung vào", a: ["phát triển kinh tế.", "xây dựng văn hóa.", "phát triển vũ khí.", "ổn định chính trị."], c: 0 },
+  { id: 36, q: "Nội dung nào sau đây không thể hiện đúng mối quan hệ giữa các cường quốc trong giai đoạn sau Chiến tranh lạnh?", a: ["Đối thoại, hợp tác.", "Cùng tồn tại hòa bình.", "Hợp tác cùng có lợi.", "Chiến tranh tổng lực."], c: 3 },
+  { id: 37, q: "Sự phát triển nhanh chóng của quan hệ thương mại quốc tế là một trong những biểu hiện của xu thế", a: ["toàn cầu hóa.", "đa dạng hóa.", "nhất thể hóa.", "hợp tác hóa."], c: 0 },
+  { id: 38, q: "Sự ra đời tổ chức Hiệp ước Bắc Đại Tây Dương (NATO, 1949) và tổ chức Hiệp ước Vácsava (1955) là hệ quả trực tiếp của", a: ["các cuộc chiến tranh cục bộ trên thế giới.", "xung đột vũ trang giữa Tây Âu và Đông Âu.", "cuộc Chiến tranh lạnh do Mĩ phát động.", "kế hoạch Mác-san do Mĩ tiến hành ở châu Âu."], c: 2 },
+  { id: 39, q: "Mục tiêu và nguyên tắc hoạt động của Liên hợp quốc được quy định trong văn kiện quan trọng nào sau đây?", a: ["Hiến chương.", "Hiến pháp.", "Tuyên ngôn.", "Hiệp định."], c: 0 },
+  { id: 40, q: "Nội dung nào sau đây phản ánh đúng mục tiêu của Mĩ khi phát động Chiến tranh lạnh (1947)?", a: ["Đàn áp phong trào giải phóng dân tộc ở châu Âu.", "Chống lại các lực lượng khủng bố ở châu Âu.", "Chống lại Liên Xô và các nước ở Đông Âu.", "Thiết lập liên minh kinh tế của các nước Đông Âu."], c: 2 },
+  { id: 41, q: "Nội dung nào sau đây là biểu hiện của Chiến tranh lạnh?", a: ["Các cuộc chiến tranh cục bộ diễn ra ở nhiều nơi.", "Trung Quốc và Liên Xô chạy đua vũ trang.", "Trung Quốc và Mĩ trở thành đối tác chiến lược.", "Mĩ phát triển trở thành siêu cường duy nhất."], c: 0 },
+  { id: 42, q: "Khái niệm "đa cực" được hiểu là", a: ["thế giới bị chi phối bởi các liên minh quân sự do Mĩ đứng đầu.", "một trật tự mới với vai trò vượt trội của Mĩ, chi phối các nước khác.", "một trật tự thế giới mà các nước vừa và nhỏ có vai trò quyết định.", "trạng thái địa - chính trị toàn cầu với nhiều trung tâm quyền lực chi phối."], c: 3 },
+  { id: 43, q: "Nội dung nào sau đây là một trong những mục tiêu hoạt động của Liên hợp quốc?", a: ["Xây dựng một tổ chức vững mạnh về quân sự và thịnh vượng về kinh tế.", "Hợp tác quốc tế trong việc giải quyết các vấn đề quốc tế về kinh tế, xã hội...", "Giải quyết thành công vấn đề an sinh, xã hội của tất cả các quốc gia, khu vực.", "Liên kết các quốc gia, khu vực thành các trung tâm kinh tế - văn hoá - quân sự."], c: 1 },
+  { id: 44, q: "Nội dung nào sau đây là vai trò của Liên hợp quốc về bảo đảm quyền con người, phát triển văn hoá, xã hội?", a: ["Giảm lãi suất cho vay ở hầu hết các nước phát triển.", "Tăng cường bình đẳng giới và vị thế của phụ nữ.", "Xóa bỏ hoàn toàn những mâu thuẫn, bất bình đẳng.", "Hoàn thành phổ cập giáo dục đại học ở các nước."], c: 1 },
+  { id: 45, q: "Trật tự thế giới hai cực I-an-ta sụp đổ (năm 1991) có tác động nào sau đây đến quan hệ quốc tế?", a: ["Mở rộng quan hệ quốc tế, thúc đẩy xu thế toàn cầu hóa.", "Mĩ chuyển sang ủng hộ xu thế đa cực, nhiều trung tâm.", "Đưa tới sự ra đời của Hiệp hội các quốc gia Đông Nam Á.", "Giúp Trung Quốc trở thành nền kinh tế số một thế giới."], c: 0 },
+  { id: 46, q: "Tổ chức nào sau đây không phải là tổ chức - diễn đàn kinh tế, tài chính khu vực, liên khu vực?", a: ["Diễn đàn hợp tác Á - Âu (ASEM).", "Nhóm 20 nền kinh tế lớn nhất thế giới (G20).", "Hiệp ước Bắc Đại Tây Dương (NATO).", "Nhóm 7 nước công nghiệp phát triển (G7)."], c: 2 },
+  { id: 47, q: "“Liên hợp quốc đã soạn thảo và xây dựng được hệ thống các công ước quốc tế về giải trừ quân bị, chống chạy đua vũ trang”. Việc làm đó thể hiện vai trò của tổ chức Liên hợp quốc trong việc", a: ["duy trì hòa bình, an ninh thế giới.", "đảm bảo quyền cơ bản của con người.", "thúc đẩy phát triển kinh tế quốc tế.", "nâng cao đời sống, thu nhập người dân."], c: 0 },
+  { id: 48, q: "Một trong những xu thế phát triển chính của thế giới sau Chiến tranh lạnh là xu thế", a: ["đa cực.", "đơn cực.", "độc quyền.", "hai cực."], c: 0 },
+  { id: 49, q: "Tổ chức Liên hợp quốc được thành lập trong bối cảnh nhân dân thế giới ý thức sâu sắc về hậu quả tàn khốc của", a: ["chiến tranh lạnh", "khủng hoảng kinh tế", "phân hóa giàu nghèo", "chiến tranh thế giới"], c: 3 },
+  { id: 50, q: "Tại hội nghị Tê - hê - ran (1943), nguyên thủ quốc gia nào sau đây khẳng định quyết tâm thành lập tổ chức Liên hợp quốc?", a: ["Mỹ", "Việt Nam", "Thái Lan", "Ấn Độ"], c: 0 },
+  { id: 51, q: "Tổ chức Liên hợp quốc được thành lập sau Chiến tranh thế giới thứ hai nhằm mục đích chủ yếu nào sau đây?", a: ["Duy trì hòa bình và an ninh quốc tế.", "Thúc đẩy đối ngoại trên phạm vi toàn cầu", "Nhanh chóng tiêu diệt phát xít Đức.", "Hỗ trợ các nước bại trận khôi phục kinh tế."], c: 0 },
+  { id: 52, q: "Nội dung nào sau đây không phải là nguyên tắc hoạt động của Liên hợp quốc?", a: ["Không can thiệp vào công việc nội bộ của bất kì nước nào.", "Tăng cường hợp tác giữa các nước trong lĩnh vực kinh tế.", "Giải quyết các tranh chấp quốc tế bằng biện pháp hòa bình.", "Tôn trọng các nghĩa vụ quốc tế và luật pháp quốc tế."], c: 1 },
+  { id: 53, q: "Nguyên thủ quốc gia nào sau đây tham dự Hội nghị Ianta (tháng 2-1945)?", a: ["Nhật Bản.", "Trung Quốc.", "Pháp.", "Liên Xô."], c: 3 },
+  { id: 54, q: "Từ đầu những năm 70 của thế kỉ XX đến năm 1991 là giai đoạn trật tự hai cực I-an-ta", a: ["xác lập và phát triển", "suy yếu và sụp đổ", "bước đầu xói mòn", "bước đầu xác lập"], c: 1 },
+  { id: 55, q: "Trong giai đoạn xác lập và phát triển của trật tự hai cực I-an-ta, Mỹ và Liên Xô đã có hành động nào sau đây?", a: ["Cải cách kinh tế- xã hội.", "Hợp tác phát triển kinh tế.", "Ủng hộ chiến tranh thế giới.", "Tăng cường chạy đua vũ trang."], c: 3 },
+  { id: 56, q: "Sự kiện lịch sử nào sau đây diễn ra trong thời kì tồn tại của trật tự hai cực I-an-ta (1945 - 1991)?", a: ["Liên bang cộng hòa xã hội chủ nghĩa Xô viết được thành lập.", "Việt Nam gia nhập Hiệp hội các quốc gia Đông Nam Á.", "Các thế lực phát xít lên cầm quyền ở một số nước châu Âu.", "Liên Xô và Mĩ thỏa thuận hạn chế vũ khí tiến công chiến lược."], c: 3 },
+  { id: 57, q: "Trật tự hai cực I-an-ta sụp đổ đã có tác động nào sau đây đến tình hình thế giới?", a: ["Tạo điều kiện thuận lợi để các nước thuộc địa phát triển mạnh mẽ kinh tế, xã hội.", "Mở ra thời kì Mĩ vươn lên xác lập được trật tự thế giới đơn cực, bá chủ thế giới.", "Mở ra chiều hướng và điều kiện giải quyết hòa bình các tranh chấp, xung đột quốc tế.", "Tạo điều kiện thuận lợi để Liên Xô và các nước Đông Âu vươn lên phát triển kinh tế."], c: 2 },
+  { id: 58, q: "Nội dung nào sau đây không phải là quyết định của hội nghị I-an-ta (2-1945)?", a: ["Chia cắt bán đảo Triều Tiên thành hai miền.", "Quyết định thành lập tổ chức Liên hợp quốc.", "Chia cắt Việt Nam và bán đảo Đông Dương.", "Tây Âu thuộc phạm vi ảnh hưởng của Mĩ."], c: 2 },
+  { id: 59, q: "Nội dung nào sau đây là xu thế phát triển của thế giới sau Chiến tranh lạnh được nhân dân các nước hi vọng, mong muốn trở thành hiện thực?", a: ["Hoà bình, ổn định để cùng phát triển.", "Đơn cực, siêu cường trong đối ngoại quốc tế.", "Liên kết và hội nhập giữa các nước lớn.", "Phát triển kinh tế, quân sự là trung tâm."], c: 0 },
+  { id: 60, q: "Nội dung nào sau đây là biểu hiện của xu thế toàn cầu hóa trong quan hệ quốc tế sau Chiến tranh lạnh?", a: ["Sự phát triển nhanh quan hệ thương mại quốc tế.", "Các quốc gia ra sức chạy đua vũ trang mạnh mẽ.", "Đông Nam Á có tốc độ phát triển nhanh nhất thế giới.", "Xu thế liên kết khu vực trở thành chủ đạo của thế giới."], c: 0 },
+  { id: 61, q: "Sau khi chiến tranh lạnh chấm dứt, yếu tố nào sau đây đóng vai trò là trung tâm trong quan hệ quốc tế?", a: ["Quân sự", "Chính trị", "Vũ khí chiến lược", "Kinh tế"], c: 3 },
+  { id: 62, q: "Sau khi chiến tranh lạnh chấm dứt, quốc gia nào sau đây ở châu Á đã vươn lên trở thành một cực trong trật tự thế giới đa cực?", a: ["Anh.", "Trung Quốc.", "Hà Lan.", "Hy Lạp."], c: 1 },
+  { id: 63, q: "Nội dung nào sau đây phản ánh đúng xu thế phát triển của thế giới từ sau khi Chiến tranh lạnh chấm dứt?", a: ["Các quốc gia đều tập trung lấy phát triển quân sự làm trọng điểm.", "Trật tự thế giới đơn cực được xác lập trong quan hệ quốc tế.", "Mỹ nắm vai trò là siêu cường duy nhất chi phối quan hệ quốc tế", "Các nước điều chỉnh quan hệ theo hướng hòa hoãn, đối thoại, hợp tác"], c: 3 },
+  { id: 64, q: "“Không có một trung tâm quyền lực thống trị, thay vào đó, nhiều quốc gia, khu vực tạo ra thế cân bằng về kinh tế, chính trị, quân sự toàn cầu”. Đoạn thông tin trên phản ánh đặc điểm của trật tự thế giới nào sau đây?", a: ["trật tự đa cực", "Trật tự đơn cực", "Trật tự hai cực I-an-ta", "Trật tự Vécxai - Oasinhtơn"], c: 0 }
+];
+
+const PART2_BANK = [
+  {
+    id: 1,
+    passage: "“Với sự kết thúc của Chiến tranh lạnh, một số quốc gia mới nổi, đặc biệt là Trung Quốc và Ấn Độ, đã bắt đầu khẳng định vị thế của mình trong trật tự quốc tế. Sự tăng trưởng kinh tế vượt bậc và sự gia tăng sức mạnh quân sự của những quốc gia này đã thách thức vị trí thống trị của Hoa Kỳ và làm cho thế giới trở nên đa cực hơn”.",
+    source: "(Fareed Zakaria, Sự trỗi dậy của các quốc gia mới nổi và trật tự thế giới, 2008, tr. 34-35)",
+    items: [
+      { text: "a) Sau Chiến tranh lạnh, một trật tự thế giới mới đơn cực đã được xác lập.", ans: false },
+      { text: "b) Một số quốc gia mới nổi ngày càng vươn lên khẳng định vị thế quốc tế.", ans: true },
+      { text: "c) Tăng trưởng kinh tế là nền tảng để xây dựng sức mạnh thực lực quốc gia.", ans: true },
+      { text: "d) Trung Quốc, Nga, Mĩ là những cường quốc mới nổi sau Chiến tranh lạnh.", ans: false }
+    ]
+  },
+  {
+    id: 2,
+    passage: "“Việc thành lập Liên hợp quốc năm 1945 đại diện cho một nỗ lực tiến bộ lớn của nhân loại nhằm thay thế hệ thống chính trị quốc tế cũ. Hiến chương Liên hợp quốc đã khẳng định các nguyên tắc về quyền tự quyết của các dân tộc, sự bình đẳng chủ quyền giữa tất cả các quốc gia, và lệnh cấm sử dụng vũ lực trong quan hệ quốc tế. Tuy nhiên, hiệu quả hoạt động của tổ chức này phụ thuộc chặt chẽ vào cơ chế đồng thuận của năm ủy viên thường trực Hội đồng Bảo an – một cơ chế vừa bảo đảm tiếng nói của các cường quốc, vừa phản ánh thực tế quyền lực có tính phân cực sâu sắc lúc bấy giờ.”",
+    source: "(Paul Kennedy, Sự trỗi dậy và suy tàn của các cường quốc, NXB Vintage, 1989, tr. 512)",
+    items: [
+      { text: "a) Liên hợp quốc là một tổ chức quốc tế tiến bộ, văn kiện quan trọng nhất là Hiến chương.", ans: true },
+      { text: "b) Liên hợp quốc luôn giải quyết triệt để tất cả các cuộc xung đột, tranh chấp quốc tế.", ans: false },
+      { text: "c) Liên hợp quốc hoạt động theo cơ chế đồng thuận của tất cả các nước thành viên.", ans: false },
+      { text: "d) Hiến chương Liên hợp quốc cho phép thành viên sử dụng vũ lực khi tranh chấp chủ quyền.", ans: false }
+    ]
+  },
+  {
+    id: 3,
+    passage: "“Ở khu vực châu Á, các quyết định của Hội nghị I-an-ta phản ánh sự mặc cả quyền lực rõ rệt giữa ba cường quốc, đặc biệt là Mỹ và Liên Xô. Để đổi lấy việc Liên Xô tham chiến chống phát xít Nhật, Mỹ và Anh đã chấp nhận các điều kiện về việc duy trì trạng thái nguyên trạng của Mông Cổ, trả lại cho Liên Xô những quyền lợi đã mất trong cuộc chiến tranh Nga - Nhật (1904 – 1905) … Những thỏa thuận này không chỉ ảnh hưởng đến chủ quyền của Trung Quốc mà còn vạch ra ranh giới địa chính trị mới, dẫn đến sự chia cắt lâu dài tại bán đảo Triều Tiên sau này.”",
+    source: "(Trích Giáo trình Lịch sử thế giới hiện đại, NXB Đại học Sư phạm, 2018, tr. 142)",
+    items: [
+      { text: "a) Liên Xô sẽ tham chiến chống phát xít Nhật, kèm theo các quyền lợi được Mĩ, Anh thừa nhận.", ans: true },
+      { text: "b) Thỏa thuận I-an-ta hoàn toàn tôn trọng toàn vẹn chủ quyền lãnh thổ của các quốc gia châu Á.", ans: false },
+      { text: "c) Bán đảo Triều Tiên bị chia cắt là hệ quả phân chia khu vực chiếm đóng giữa các cường quốc.", ans: true },
+      { text: "d) Việc phân chia phạm vi ảnh hưởng ở châu Á của ba cường quốc rất nhanh chóng đồng thuận.", ans: false }
+    ]
+  },
+  {
+    id: 4,
+    passage: "“Toàn cầu hóa vừa là một cơ hội lớn, vừa là một thách thức nghiệt ngã đối với các nước đang phát triển sau Chiến tranh lạnh. Quá trình này thúc đẩy sự luân chuyển tự do của dòng vốn, công nghệ và con người, tạo điều kiện cho các nước đi sau rút ngắn khoảng cách phát triển. Tuy nhiên, nó cũng làm trầm trọng thêm tình trạng bất bình đẳng giàu nghèo giữa các quốc gia, làm xói mòn chủ quyền quốc gia bởi áp lực từ các tập đoàn xuyên quốc gia và đặt các nền văn hóa bản địa trước nguy cơ bị đồng hóa.”",
+    source: "(Thomas Friedman, Chiếc Lexus và cây ô liu, NXB Farrar, Straus and Giroux, 1999, tr. 105)",
+    items: [
+      { text: "a) Toàn cầu hóa tác động sâu sắc đến các quốc gia, đặc biệt là các nước đang phát triển.", ans: true },
+      { text: "b) Đối với các nước đi sau, toàn cầu hóa mở ra cơ hội thúc đẩy tốc độ tăng trưởng kinh tế.", ans: true },
+      { text: "c) Toàn cầu hóa sẽ xóa bỏ hoàn toàn khoảng cách giàu nghèo và bảo vệ chủ quyền quốc gia.", ans: false },
+      { text: "d) Nguy cơ mất bản sắc văn hóa dân tộc là một trong những thách thức của toàn cầu hóa.", ans: true }
+    ]
+  },
+  {
+    id: 5,
+    passage: "“Trật tự thế giới mới này được hình thành như thế nào, còn tuỳ thuộc ở nhiều nhân tố: Sự phát triển về thực lực kinh tế, chính trị, quân sự của các cường quốc Mĩ, Nga, Trung Quốc, Anh, Pháp, Nhật Bản, Đức trong cuộc chạy đua về sức mạnh quốc gia tổng hợp. Sự lớn mạnh của lực lượng cách mạng thế giới (sự thành bại của công cuộc cải cách, đổi mới ở các nước xã hội chủ nghĩa); Sự phát triển của cách mạng khoa học - kĩ thuật sẽ còn tiếp tục tạo ra những “đột phá” và biến chuyển trên cục diện thế giới”.",
+    source: "(Nguyễn Anh Thái (Chủ biên), Lịch sử thế giới hiện đại, NXB Giáo dục Việt Nam, Hà Nội, 2021, tr.424)",
+    items: [
+      { text: "a) Đoạn tư liệu trên đề cập đến sự hình thành của trật tự thế giới hai cực I-an-ta.", ans: false },
+      { text: "b) Anh, Pháp đã trở thành những cực lớn nhất trong trật tự thế giới đa cực từ sau Chiến tranh thế giới thứ hai.", ans: false },
+      { text: "c) Sự phát triển của cách mạng khoa học - kĩ thuật là một trong những nhân tố tác động đến sự hình thành trật tự thế giới mới.", ans: true },
+      { text: "d) Sức mạnh tổng hợp của các cường quốc Mĩ, Nga, Trung Quốc, Anh, Pháp, Nhật Bản, Đức sẽ góp phần định hình trật tự thế giới mới.", ans: true }
+    ]
+  },
+  {
+    id: 6,
+    passage: "“Trước kia chế độ quân chủ tại Hy Lạp đã nhờ vào sự giúp đỡ của Anh, nhưng sau Chiến tranh thế giới thứ hai, kinh tế của nước Anh hoàn toàn suy kiệt, lo cho mình còn không xong, nên không thể giúp được gì cho chế độ quân chủ ở Hy Lạp nữa. Vào ngày 12-3-1947, Tổng thống Tờ-ru-man đã đọc một bài diễn văn tại lưỡng viện Quốc hội Mĩ, cho rằng Hy Lạp và Thổ Nhĩ Kỳ nếu bị rơi vào khối xã hội chủ nghĩa, thì cả Trung Đông cũng sẽ rơi theo... sẽ làm cho tất cả Tây Âu bị ảnh hưởng. Do vậy, ông thuyết phục Quốc hội Mĩ chi viện kinh tế và quân sự cho Hy Lạp và Thổ Nhĩ Kỳ với số tiền 400 triệu đô. Lí luận này về sau được gọi là “Học thuyết Tờ-ru-man” - là sự khởi đầu của cuộc Chiến tranh lạnh”.",
+    source: "(Vương Kính Chi, Lược sử nước Mĩ (Phong Đảo dịch), NXB TP. Hồ Chí Minh, 2000, tr. 145)",
+    items: [
+      { text: "a) Chiến tranh lạnh là cuộc đối đầu gay gắt giữa Mĩ và Liên Xô chỉ diễn ra ở châu Âu.", ans: false },
+      { text: "b) Thông điệp của Tổng thống Mĩ Tờ-ru-man đọc trước Quốc hội Mĩ ngày 12-3-1947 đã khởi đầu cuộc Chiến tranh lạnh chống lại Liên Xô và các nước Đông Âu.", ans: true },
+      { text: "c) Nguồn gốc của sự đối đầu căng thẳng giữa Mĩ và Liên Xô xuất phát từ “vấn đề Hy Lạp và Thổ Nhĩ Kỳ” sau Chiến tranh thế giới thứ hai.", ans: false },
+      { text: "d) Học thuyết Tờ-ru-man phản ánh một phần chính sách đối ngoại của Mĩ sau Chiến tranh thế giới thứ hai, muốn đưa nước Mĩ trở thành bá chủ thế giới.", ans: true }
+    ]
+  },
+  {
+    id: 7,
+    passage: "“Mọi người sinh ra đều được tự do và bình đẳng về nhân quyền và các quyền. Mọi người đều được tạo hoá ban cho lí trí và lương tâm, và cần phải đối xử với nhau bằng tình anh em”.",
+    source: "(Trích: Điều 1, Tuyên ngôn Quốc tế Nhân quyền của Liên hợp quốc)",
+    items: [
+      { text: "a) Đoạn tư liệu là một nội dung quan trọng về Tuyên ngôn Quốc tế Nhân quyền của Liên hợp quốc.", ans: true },
+      { text: "b) Chỉ các dân tộc trên thế giới sau khi tuyên bố độc lập mới được tự do, bình đẳng về nhân quyền.", ans: false },
+      { text: "c) Tuyên ngôn Quốc tế Nhân quyền đã góp phần xây dựng một thế giới công bằng hơn, tạo cơ hội phát triển cho tất cả mọi người ở mọi quốc gia trên thế giới.", ans: true },
+      { text: "d) Trong việc bảo đảm quyền con người, Liên hợp quốc chỉ tập trung bảo vệ quyền phụ nữ và trẻ em ở các nước đang chịu “di chứng” của chủ nghĩa thực dân.", ans: false }
+    ]
+  },
+  {
+    id: 8,
+    passage: `<table class="data-table">
+      <tr><th>Thời gian</th><th>Nội dung sự kiện</th></tr>
+      <tr><td>2 - 1945</td><td>Hội nghị I-an-ta thỏa thuận xong việc phân chia phạm vi ảnh hưởng giữa các cường quốc thắng trận ở châu Âu, châu Á.</td></tr>
+      <tr><td>Năm 1947</td><td>Thông điệp của Tổng thống Mĩ Tơ-ru-man; Mĩ triển khai Kế hoạch Mác-san (Kế hoạch phục hưng châu Âu).</td></tr>
+      <tr><td>Năm 1949</td><td>Mĩ thành lập khối quân sự NATO; Liên Xô và các nước Đông Âu thành lập Hội đồng tương trợ kinh tế (SEV).</td></tr>
+      <tr><td>Năm 1955</td><td>Liên Xô và các nước Đông Âu thành lập khối quân sự VÁC-SA-VA.</td></tr>
+    </table>`,
+    source: "(Bảng dữ kiện lịch sử)",
+    items: [
+      { text: "a) Bảng dữ kiện phản ánh những sự kiện trong quá trình xác lập Trật tự thế giới hai cực I-an-ta.", ans: true },
+      { text: "b) Trật tự thế giới hai cực I-an-ta đã làm căng thẳng chính trị và quan hệ quốc tế trong nhiều thế kỉ.", ans: false },
+      { text: "c) Đỉnh cao về sự đối đầu giữa hai cực, hai phe là cuộc Chiến tranh lạnh kéo dài không có hồi kết.", ans: false },
+      { text: "d) Trong Chiến tranh lạnh, 2 nước Mĩ và Liên Xô đã nhiều lần đối đầu trực tiếp với nhau về quân sự.", ans: false }
+    ]
+  },
+  {
+    id: 9,
+    passage: "“[Năm 1960], Đại hội đồng Liên hợp quốc đã thông qua bản Tuyên ngôn về thủ tiêu hoàn toàn chủ nghĩa thực dân, trao trả độc lập cho các quốc gia và dân tộc thuộc địa. Đó là một sự kiện chính trị quan trọng. Tuyên ngôn đã khẳng định các nước thực dân đã vi phạm nguyên tắc quan trọng nhất của luật pháp quốc tế; khẳng định rõ ràng cơ sở pháp lí quốc tế của cuộc đấu tranh giành độc lập của các dân tộc bị áp bức”.",
+    source: "(Nguyễn Quốc Hùng - Nguyễn Hồng Quân, Liên hợp quốc và Lực lượng gìn giữ hoà bình Liên hợp quốc, NXB Chính trị quốc gia, Hà Nội, 2008, tr.46)",
+    items: [
+      { text: "a) Đoạn tư liệu khẳng định vai trò của Liên hợp quốc trong việc thúc đẩy quá trình phi thực dân hóa trên phạm vi thế giới.", ans: true },
+      { text: "b) Tuyên ngôn về thủ tiêu hoàn toàn chủ nghĩa thực dân được Đại hội đồng Liên hợp quốc thông qua đã tạo cơ sở pháp lý quốc tế cho cuộc chiến tranh vệ quốc của dân tộc Việt Nam thế kỉ XX.", ans: true },
+      { text: "c) Tuyên ngôn về thủ tiêu hoàn toàn chủ nghĩa thực dân thể hiện sự ủng hộ của Liên hợp quốc với cuộc đấu tranh giành độc lập của các nước thuộc địa, tạo nhân tố quyết định để Liên hợp quốc mở rộng thành viên.", ans: false },
+      { text: "d) Thủ tiêu hệ thống thuộc địa của chủ nghĩa thực dân, thúc đẩy phong trào giải phóng dân tộc là một trong những hoạt động quan trọng của Liên hợp quốc nhằm bảo vệ hòa bình, an ninh thế giới.", ans: true }
+    ]
+  },
+  {
+    id: 10,
+    passage: "“Bài học của thời kì Chiến tranh lạnh đã chứng tỏ phương thức quan hệ quốc tế lấy đối đầu chính trị - quân sự là chủ yếu không còn phù hợp, phải chịu nhiều tổn thất hoặc thất bại như hai nước Xô - Mỹ và một bị thương, một bị mất. Trong khi đó, phương thức lấy hợp tác và cạnh tranh về kinh tế - chính trị là chính lại thu được nhiều tiến bộ, kết quả như các nước Đức, Nhật và NICs. Sự hưng thịnh hay suy vong của một quốc gia quyết định bởi sức mạnh tổng hợp của quốc gia đó, mà chủ yếu là thực lực kinh tế và khoa học - kĩ thuật”.",
+    source: "(Vũ Dương Ninh (Chủ biên), Một số chuyên đề lịch sử thế giới, NXB Đại học Quốc gia Hà Nội, 2001, tr.401)",
+    items: [
+      { text: "a) Đoạn tư liệu trên cho thấy Kinh tế và khoa học - kĩ thuật là hai yếu tố chủ yếu tạo nên sức mạnh tổng hợp của một quốc gia sau khi chiến tranh lạnh chấm dứt.", ans: true },
+      { text: "b) Sau thời kì chiến tranh lạnh, Xô - Mỹ lấy đối đầu về chính trị - quân sự là chủ yếu, trong khi đó Đức và Nhật Bản lại lấy hợp tác và cạnh tranh về kinh tế - chính trị là chủ yếu.", ans: false },
+      { text: "c) Một trong những bài học rút ra từ thời kì chiến tranh lạnh cho tất cả các quốc gia là không nên tập trung vào phát triển quân sự, quốc phòng đất nước.", ans: false },
+      { text: "d) Trong và sau thời kì chiến tranh lạnh, nội dung của quan hệ quốc tế có sự điều chỉnh từ chỗ lấy yếu tố quân sự sang lấy yếu tố kinh tế là trọng tâm.", ans: true }
+    ]
+  }
+];
+
+let currentP1 = [];
+let currentP2 = [];
+let userAnsP1 = {};
+let userAnsP2 = {};
+let isGraded = false;
+let shuffleOptionsEnabled = true;
+let showingWrongOnly = false;
+let timerInterval = null;
+let timeLeft = 45 * 60;
+
+function shuffle(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timeLeft = 45 * 60;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    if (isGraded) { clearInterval(timerInterval); return; }
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      gradeQuiz();
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+  const s = String(timeLeft % 60).padStart(2, '0');
+  const el = document.getElementById('timer-display');
+  el.textContent = `⏱ ${m}:${s}`;
+  el.classList.toggle('urgent', timeLeft <= 300 && !isGraded);
+}
+
+function drawFromPool(storageKey, bank, count) {
+  let remainingIds = [];
+  try {
+    remainingIds = JSON.parse(localStorage.getItem(storageKey)) || [];
+  } catch (e) { remainingIds = []; }
+
+  let selectedIds = [];
+  if (remainingIds.length >= count) {
+    const shuffled = shuffle(remainingIds);
+    selectedIds = shuffled.slice(0, count);
+    remainingIds = shuffled.slice(count);
+  } else {
+    selectedIds = [...remainingIds];
+    const needed = count - selectedIds.length;
+    const freshPool = shuffle(bank.map(item => item.id).filter(id => !selectedIds.includes(id)));
+    selectedIds = selectedIds.concat(freshPool.slice(0, needed));
+    remainingIds = freshPool.slice(needed);
+  }
+
+  localStorage.setItem(storageKey, JSON.stringify(remainingIds));
+  return {
+    questions: shuffle(selectedIds.map(id => {
+      const orig = bank.find(item => item.id === id);
+      return JSON.parse(JSON.stringify(orig));
+    })),
+    remainingCount: remainingIds.length
+  };
+}
+
+function prepareOptions(questions) {
+  return questions.map(q => {
+    if (!shuffleOptionsEnabled) return q;
+    const indexed = q.a.map((text, idx) => ({ text, isCorrect: idx === q.c }));
+    const shuffled = shuffle(indexed);
+    return {
+      ...q,
+      a: shuffled.map(item => item.text),
+      c: shuffled.findIndex(item => item.isCorrect)
+    };
+  });
+}
+
+function renderQuiz() {
+  isGraded = false;
+  showingWrongOnly = false;
+  userAnsP1 = {};
+  userAnsP2 = {};
+  document.getElementById('result-box').style.display = 'none';
+  document.getElementById('submit-top-btn').disabled = false;
+
+  const drawP1 = drawFromPool('su12_pool_p1', PART1_BANK, 24);
+  const drawP2 = drawFromPool('su12_pool_p2', PART2_BANK, 4);
+
+  currentP1 = prepareOptions(drawP1.questions);
+  currentP2 = drawP2.questions;
+
+  document.getElementById('pool-p1').textContent = `Phần I còn: ${drawP1.remainingCount} / ${PART1_BANK.length} câu`;
+  document.getElementById('pool-p2').textContent = `Phần II còn: ${drawP2.remainingCount} / ${PART2_BANK.length} câu`;
+
+  // Render Phần I
+  const p1Container = document.getElementById('part1-container');
+  p1Container.innerHTML = currentP1.map((q, idx) => {
+    const letters = ['A', 'B', 'C', 'D'];
+    const optsHtml = q.a.map((optText, oIdx) => `
+      <div class="option-item" id="p1-q${idx}-o${oIdx}" onclick="selectP1(${idx}, ${oIdx})">
+        <span class="opt-letter">${letters[oIdx]}</span>
+        <span>${optText}</span>
+      </div>
+    `).join('');
+
+    return `
+      <div class="question-card" id="card-p1-${idx}">
+        <div class="q-header">
+          <div><span class="q-num">Câu ${idx + 1}.</span>${q.q}</div>
+          <span class="q-id-tag">Mã #${q.id}</span>
+        </div>
+        <div class="options-list">${optsHtml}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Render Phần II
+  const p2Container = document.getElementById('part2-container');
+  p2Container.innerHTML = currentP2.map((q, idx) => {
+    const itemsHtml = q.items.map((item, iIdx) => `
+      <div class="tf-row" id="p2-q${idx}-i${iIdx}">
+        <div class="tf-text">${item.text}</div>
+        <div class="tf-btns">
+          <span class="ans-badge" id="p2-q${idx}-i${iIdx}-badge">Đáp án: ${item.ans ? 'Đúng' : 'Sai'}</span>
+          <button type="button" class="tf-btn" id="p2-q${idx}-i${iIdx}-T" onclick="selectP2(${idx}, ${iIdx}, true)">Đúng</button>
+          <button type="button" class="tf-btn" id="p2-q${idx}-i${iIdx}-F" onclick="selectP2(${idx}, ${iIdx}, false)">Sai</button>
+        </div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="question-card" id="card-p2-${idx}">
+        <div class="q-header">
+          <div><span class="q-num">Câu ${idx + 1}.</span>Đọc đoạn tư liệu và chọn Đúng hoặc Sai cho mỗi ý a, b, c, d:</div>
+          <span class="q-id-tag">Tư liệu #${q.id}</span>
+        </div>
+        <div class="passage">
+          ${q.passage}
+          <span class="passage-source">${q.source}</span>
+        </div>
+        <div>${itemsHtml}</div>
+      </div>
+    `;
+  }).join('');
+
+  renderPalette();
+  updateProgress();
+  startTimer();
+}
+
+function renderPalette() {
+  const palP1 = document.getElementById('palette-p1');
+  palP1.innerHTML = currentP1.map((_, idx) => `
+    <div class="p-dot" id="dot-p1-${idx}" onclick="scrollToCard('card-p1-${idx}')">${idx + 1}</div>
+  `).join('');
+
+  const palP2 = document.getElementById('palette-p2');
+  palP2.innerHTML = currentP2.map((_, idx) => `
+    <div class="p-dot" id="dot-p2-${idx}" onclick="scrollToCard('card-p2-${idx}')">${idx + 1}</div>
+  `).join('');
+}
+
+function scrollToCard(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+function updateProgress() {
+  let doneCount = Object.keys(userAnsP1).length;
+  currentP1.forEach((_, idx) => {
+    const dot = document.getElementById(`dot-p1-${idx}`);
+    if (dot && !isGraded) dot.className = 'p-dot' + (userAnsP1[idx] !== undefined ? ' done' : '');
+  });
+
+  currentP2.forEach((_, idx) => {
+    const ansObj = userAnsP2[idx] || {};
+    const countSub = Object.keys(ansObj).length;
+    if (countSub === 4) doneCount++;
+    const dot = document.getElementById(`dot-p2-${idx}`);
+    if (dot && !isGraded) {
+      if (countSub === 4) dot.className = 'p-dot done';
+      else if (countSub > 0) dot.className = 'p-dot partial';
+      else dot.className = 'p-dot';
+    }
+  });
+
+  document.getElementById('answered-count').textContent = `${doneCount} / 28 câu`;
+  document.getElementById('progress-fill').style.width = `${(doneCount / 28) * 100}%`;
+}
+
+function selectP1(qIdx, oIdx) {
+  if (isGraded) return;
+  userAnsP1[qIdx] = oIdx;
+  for (let i = 0; i < 4; i++) {
+    const el = document.getElementById(`p1-q${qIdx}-o${i}`);
+    el.classList.toggle('selected', i === oIdx);
+  }
+  updateProgress();
+}
+
+function selectP2(qIdx, iIdx, val) {
+  if (isGraded) return;
+  if (!userAnsP2[qIdx]) userAnsP2[qIdx] = {};
+  userAnsP2[qIdx][iIdx] = val;
+
+  document.getElementById(`p2-q${qIdx}-i${iIdx}-T`).classList.toggle('active', val === true);
+  document.getElementById(`p2-q${qIdx}-i${iIdx}-F`).classList.toggle('active', val === false);
+  updateProgress();
+}
+
+function gradeQuiz() {
+  if (isGraded) return;
+  isGraded = true;
+  clearInterval(timerInterval);
+  document.getElementById('submit-top-btn').disabled = true;
+
+  let correctP1 = 0;
+  currentP1.forEach((q, idx) => {
+    const chosen = userAnsP1[idx];
+    const card = document.getElementById(`card-p1-${idx}`);
+    const dot = document.getElementById(`dot-p1-${idx}`);
+    for (let i = 0; i < 4; i++) {
+      const el = document.getElementById(`p1-q${idx}-o${i}`);
+      el.classList.remove('selected');
+      if (i === q.c) el.classList.add('correct');
+      else if (i === chosen && chosen !== q.c) el.classList.add('wrong');
+    }
+    if (chosen === q.c) {
+      correctP1++;
+      card.dataset.correct = "true";
+      if (dot) dot.className = 'p-dot correct';
+    } else {
+      card.dataset.correct = "false";
+      if (dot) dot.className = 'p-dot wrong';
+    }
+  });
+  const scoreP1 = correctP1 * 0.25;
+
+  let scoreP2 = 0;
+  const scaleP2 = [0, 0.1, 0.25, 0.5, 1.0];
+
+  currentP2.forEach((q, idx) => {
+    let correctSub = 0;
+    const card = document.getElementById(`card-p2-${idx}`);
+    const dot = document.getElementById(`dot-p2-${idx}`);
+    q.items.forEach((item, iIdx) => {
+      const chosen = userAnsP2[idx] ? userAnsP2[idx][iIdx] : undefined;
+      const rowEl = document.getElementById(`p2-q${idx}-i${iIdx}`);
+      const badgeEl = document.getElementById(`p2-q${idx}-i${iIdx}-badge`);
+      badgeEl.style.display = 'inline-block';
+      if (chosen === item.ans) {
+        correctSub++;
+        rowEl.classList.add('correct-row');
+      } else {
+        rowEl.classList.add('wrong-row');
+      }
+    });
+    scoreP2 += scaleP2[correctSub];
+    if (correctSub === 4) {
+      card.dataset.correct = "true";
+      if (dot) dot.className = 'p-dot correct';
+    } else {
+      card.dataset.correct = "false";
+      if (dot) dot.className = 'p-dot wrong';
+    }
+  });
+
+  const total = scoreP1 + scoreP2;
+  const resBox = document.getElementById('result-box');
+  resBox.style.display = 'block';
+  document.getElementById('total-score').textContent = `${total.toFixed(2)} / 10`;
+  document.getElementById('score-detail').innerHTML = `
+    Phần I: <b>${scoreP1.toFixed(2)} / 6.00 điểm</b> (Đúng ${correctP1}/24 câu) &nbsp;|&nbsp;
+    Phần II: <b>${scoreP2.toFixed(2)} / 4.00 điểm</b>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function filterWrongOnly() {
+  showingWrongOnly = !showingWrongOnly;
+  const btn = document.getElementById('filter-wrong-btn');
+  btn.textContent = showingWrongOnly ? '📋 Hiện tất cả câu hỏi' : '🔍 Chỉ xem câu làm sai';
+
+  document.querySelectorAll('.question-card').forEach(card => {
+    if (showingWrongOnly && card.dataset.correct === "true") {
+      card.style.display = 'none';
+    } else {
+      card.style.display = 'block';
+    }
+  });
+}
+
+function toggleShuffleOpts() {
+  shuffleOptionsEnabled = !shuffleOptionsEnabled;
+  document.getElementById('shuffle-opt-btn').textContent = `🔀 Đảo đáp án: ${shuffleOptionsEnabled ? 'BẬT' : 'TẮT'}`;
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark');
+}
+
+function loadNewQuiz() {
+  renderQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetPool() {
+  localStorage.removeItem('su12_pool_p1');
+  localStorage.removeItem('su12_pool_p2');
+  renderQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.addEventListener('DOMContentLoaded', renderQuiz);
+</script>
+
+</body>
+</html>
